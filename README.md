@@ -35,3 +35,13 @@ scripts/run-docker-harness.sh --repo-url https://github.com/sejeonglee/llm-repor
 ```
 
 Use `--dry-run` to preview the Docker commands first. See `docs/docker-harness.md` for artifact details.
+
+## Consolidated verification
+
+Run `scripts/run-verification.sh` to execute the package test suite, syntax checks, and Docker harness flow in one command:
+
+```bash
+scripts/run-verification.sh --repo-url https://github.com/sejeonglee/llm-report-module --artifacts-dir .artifacts/verification
+```
+
+See `docs/verification.md` for details.
