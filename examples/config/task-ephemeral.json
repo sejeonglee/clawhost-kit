@@ -1,0 +1,23 @@
+{
+  "scope": "per-task-ephemeral",
+  "task_id": "issue-42",
+  "instance_id": "llm-report-module",
+  "source_ref": {
+    "kind": "github_issue",
+    "id": "42"
+  },
+  "worktree": {
+    "path": "/srv/clawhost/instances/llm-report-module/worktrees/issue-42",
+    "branch": "autonomous/issue-42"
+  },
+  "execution": {
+    "status": "queued",
+    "attempt": 1,
+    "started_at": null,
+    "finished_at": null
+  },
+  "artifacts": {
+    "log_file": "/srv/clawhost/instances/llm-report-module/state/tasks/issue-42/run.log",
+    "result_file": "/srv/clawhost/instances/llm-report-module/state/tasks/issue-42/result.json"
+  }
+}
