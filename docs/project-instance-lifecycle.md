@@ -27,6 +27,7 @@ python3 scripts/clawhost-instance.py status --instances-root /srv/clawhost/insta
 
 - `scope`
 - `instance_id`
+- `created_at`
 - `repo`
 - `paths`
 - `intake`

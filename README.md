@@ -234,7 +234,7 @@ python3 scripts/clawhost-instance.py create \
 This materializes:
 - `config/project-instance.json`
 - `state/runtime.json`
-- `state/github-issues-cursor.json`
+- `state/github-issue-cursor.json`
 - manual brief intake directories
 - worktree root
 - logs dir
@@ -424,7 +424,6 @@ This runs:
 1. Python unit tests
 2. Python compile checks
 3. Bash syntax checks
-4. Docker harness dry-run
 4. Generated project-instance artifact validation
 5. Docker harness dry-run
 6. Docker harness live execution

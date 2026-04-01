@@ -1,9 +1,13 @@
 {
   "scope": "project-instance",
   "instance_id": "llm-report-module",
+  "created_at": "2026-04-02T00:00:00Z",
   "repo": {
     "url": "https://github.com/sejeonglee/llm-report-module",
-    "default_branch": "main"
+    "default_branch": "main",
+    "github_owner": "sejeonglee",
+    "github_repo": "llm-report-module",
+    "slug": "sejeonglee/llm-report-module"
   },
   "paths": {
     "instance_root": "/srv/clawhost/instances/llm-report-module",
@@ -15,7 +19,16 @@
     "sources": [
       "github_issue",
       "manual_brief"
-    ]
+    ],
+    "github_issue_polling": {
+      "enabled": true,
+      "poll_interval_seconds": 90
+    },
+    "manual_brief": {
+      "enabled": true,
+      "inbox_dir": "/srv/clawhost/instances/llm-report-module/intake/manual-briefs",
+      "archive_dir": "/srv/clawhost/instances/llm-report-module/intake/manual-briefs-archive"
+    }
   },
   "poller": {
     "provider": "github_issue",
