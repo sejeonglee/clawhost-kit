@@ -1,0 +1,5 @@
+.git
+.omx
+__pycache__/
+*.pyc
+.artifacts/

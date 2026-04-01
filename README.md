@@ -25,3 +25,13 @@ python3 scripts/clawhost-instance.py status --instances-root /srv/clawhost/insta
 ```
 
 See `docs/project-instance-lifecycle.md` for the instance layout and default runtime knobs.
+
+## Docker harness
+
+Use `scripts/run-docker-harness.sh` to build a disposable verification image and run bootstrap + instance lifecycle checks with the target repo URL supplied at runtime:
+
+```bash
+scripts/run-docker-harness.sh --repo-url https://github.com/sejeonglee/llm-report-module --artifacts-dir .artifacts/docker-harness
+```
+
+Use `--dry-run` to preview the Docker commands first. See `docs/docker-harness.md` for artifact details.
