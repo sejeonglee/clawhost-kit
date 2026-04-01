@@ -5,12 +5,18 @@ This package keeps each managed repository inside its own instance boundary whil
 ## Isolation Rules
 
 ### Host-global caps
-Host-global config sets shared admission limits:
+Host-global config sets shared admission limits and resource policy knobs:
 - `concurrency.max_active_instances`
 - `concurrency.max_parallel_tasks`
+- `resources.host_memory_gb`
+- `resources.reserved_memory_gb`
+- `resources.max_memory_per_instance_gb`
+- `resources.max_memory_per_task_gb`
 
 These caps are the only place where fleet-wide execution limits are stored.
 Project-instance and per-task state may observe these limits, but they may not redefine them.
+
+The defaults may be conservative for a small host, but scaling to a 24GB host is meant to be a config update, not a code fork.
 
 ### Project-instance isolation
 Each repository instance owns a private subtree:
@@ -42,6 +48,8 @@ Each execution lane lives under a single project-instance:
 2. one project-instance config
 3. one per-task-ephemeral config
 
+It also validates that host-global concurrency fits inside configurable resource limits instead of assuming an 8GB-only deployment.
+
 Example:
 
 ```bash
@@ -52,6 +60,7 @@ python3 tools/runtime_isolation.py \
 ```
 
 Successful validation proves:
-- host-wide concurrency caps are defined centrally
+- host-wide concurrency caps and resource knobs are defined centrally
 - per-instance poller/state/worktree paths are nested inside one instance root
 - task worktrees/artifacts stay inside the owning instance boundary
+- capacity policy can scale by editing host-global knobs rather than changing code

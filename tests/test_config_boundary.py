@@ -29,6 +29,15 @@ class ConfigBoundaryTests(unittest.TestCase):
 
         self.assertIn("cross-scope keys not allowed", str(error.exception))
 
+    def test_project_instance_rejects_resource_policy(self):
+        config = self._load_example("project-instance.json")
+        config["resources"] = {"host_memory_gb": 24}
+
+        with self.assertRaises(ValidationError) as error:
+            validate_config(config, source="project-instance.json")
+
+        self.assertIn("resources", str(error.exception))
+
     def test_task_scope_rejects_repo_poller_state(self):
         config = self._load_example("task-ephemeral.json")
         config["poller"] = {"interval_seconds": 10}

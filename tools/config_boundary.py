@@ -10,19 +10,19 @@ from typing import Any
 
 SCOPE_RULES = {
     "host-global": {
-        "required": {"host_id", "paths", "toolchain", "concurrency", "secret_refs", "logging"},
-        "allowed": {"scope", "host_id", "paths", "toolchain", "concurrency", "secret_refs", "logging"},
+        "required": {"host_id", "paths", "toolchain", "concurrency", "resources", "secret_refs", "logging"},
+        "allowed": {"scope", "host_id", "paths", "toolchain", "concurrency", "resources", "secret_refs", "logging"},
         "forbidden": {"repo", "poller", "instance_id", "task_id", "worktree", "execution", "artifacts", "source_ref"},
     },
     "project-instance": {
         "required": {"instance_id", "repo", "paths", "intake", "poller", "host_defaults_ref", "env"},
         "allowed": {"scope", "instance_id", "repo", "paths", "intake", "poller", "host_defaults_ref", "env"},
-        "forbidden": {"host_id", "concurrency", "secret_refs", "task_id", "worktree", "execution", "artifacts", "source_ref"},
+        "forbidden": {"host_id", "concurrency", "resources", "secret_refs", "task_id", "worktree", "execution", "artifacts", "source_ref"},
     },
     "per-task-ephemeral": {
         "required": {"task_id", "instance_id", "source_ref", "worktree", "execution", "artifacts"},
         "allowed": {"scope", "task_id", "instance_id", "source_ref", "worktree", "execution", "artifacts"},
-        "forbidden": {"host_id", "repo", "poller", "concurrency", "secret_refs", "logging", "intake", "host_defaults_ref"},
+        "forbidden": {"host_id", "repo", "poller", "concurrency", "resources", "secret_refs", "logging", "intake", "host_defaults_ref"},
     },
 }
 

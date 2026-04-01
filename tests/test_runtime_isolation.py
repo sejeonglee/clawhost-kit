@@ -55,9 +55,9 @@ class RuntimeIsolationTests(unittest.TestCase):
 
         self.assertIn("worktree.path", str(error.exception))
 
-    def test_host_caps_must_be_positive(self):
+    def test_host_caps_must_fit_available_memory(self):
         host = self._load("host-global.json")
-        host["concurrency"]["max_parallel_tasks"] = 0
+        host["concurrency"]["max_parallel_tasks"] = 4
 
         with self.assertRaises(IsolationError) as error:
             validate_runtime_isolation(
@@ -67,6 +67,19 @@ class RuntimeIsolationTests(unittest.TestCase):
             )
 
         self.assertIn("max_parallel_tasks", str(error.exception))
+
+    def test_reserved_memory_must_be_smaller_than_host(self):
+        host = self._load("host-global.json")
+        host["resources"]["reserved_memory_gb"] = 8
+
+        with self.assertRaises(IsolationError) as error:
+            validate_runtime_isolation(
+                host,
+                self._load("project-instance.json"),
+                self._load("task-ephemeral.json"),
+            )
+
+        self.assertIn("reserved_memory_gb", str(error.exception))
 
 
 if __name__ == "__main__":

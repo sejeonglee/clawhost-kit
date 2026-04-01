@@ -45,8 +45,30 @@ def validate_runtime_isolation(host: dict[str, Any], project: dict[str, Any], ta
         validate_config(data, source=name)
 
     concurrency = host["concurrency"]
+    resources = host["resources"]
     _validate_positive_int(concurrency.get("max_active_instances"), "concurrency.max_active_instances")
     _validate_positive_int(concurrency.get("max_parallel_tasks"), "concurrency.max_parallel_tasks")
+    _validate_positive_int(resources.get("host_memory_gb"), "resources.host_memory_gb")
+    _validate_positive_int(resources.get("reserved_memory_gb"), "resources.reserved_memory_gb")
+    _validate_positive_int(resources.get("max_memory_per_instance_gb"), "resources.max_memory_per_instance_gb")
+    _validate_positive_int(resources.get("max_memory_per_task_gb"), "resources.max_memory_per_task_gb")
+
+    host_memory = resources["host_memory_gb"]
+    reserved_memory = resources["reserved_memory_gb"]
+    per_instance_memory = resources["max_memory_per_instance_gb"]
+    per_task_memory = resources["max_memory_per_task_gb"]
+    available_memory = host_memory - reserved_memory
+
+    if reserved_memory >= host_memory:
+        raise IsolationError("resources.reserved_memory_gb must be smaller than resources.host_memory_gb")
+    if per_task_memory > per_instance_memory:
+        raise IsolationError("resources.max_memory_per_task_gb must be <= resources.max_memory_per_instance_gb")
+    if concurrency["max_parallel_tasks"] > concurrency["max_active_instances"]:
+        raise IsolationError("concurrency.max_parallel_tasks must be <= concurrency.max_active_instances")
+    if concurrency["max_active_instances"] * per_instance_memory > available_memory:
+        raise IsolationError("host resources do not cover max_active_instances * max_memory_per_instance_gb")
+    if concurrency["max_parallel_tasks"] * per_task_memory > available_memory:
+        raise IsolationError("host resources do not cover max_parallel_tasks * max_memory_per_task_gb")
 
     instance_root = _as_path(project["paths"]["instance_root"])
     state_root = _as_path(project["paths"]["state_root"])

@@ -8,7 +8,7 @@
 
 The boundary is intentionally strict so later lifecycle scripts can read the smallest possible surface:
 
-- **host-global** owns shared tool/runtime paths, concurrency caps, and secret references.
+- **host-global** owns shared tool/runtime paths, concurrency caps, resource sizing knobs, and secret references.
 - **project-instance** owns repo URL, intake/poller settings, instance-local filesystem roots, and references back to host-global defaults.
 - **per-task-ephemeral** owns only task-run state such as branch/worktree/artifact paths and execution timestamps.
 
@@ -21,6 +21,7 @@ Allowed responsibilities:
 - host identity and install roots
 - shared runtime/toolchain configuration
 - host-wide concurrency caps
+- host-wide resource policy knobs
 - default secret reference names
 - logging/observability defaults
 
@@ -28,6 +29,22 @@ Must **not** contain:
 - repo-specific URLs
 - poller cursors for a repo
 - task execution state, worktrees, or branch names
+
+### Host-global scaling knobs
+The host-global layer is where capacity policy lives. Conservative defaults can target a small host, but scale-up is a config-only change.
+
+Recommended knobs:
+- `concurrency.max_active_instances`
+- `concurrency.max_parallel_tasks`
+- `resources.host_memory_gb`
+- `resources.reserved_memory_gb`
+- `resources.max_memory_per_instance_gb`
+- `resources.max_memory_per_task_gb`
+- `resources.scale_profile`
+
+Example scaling guidance:
+- small host default: `host_memory_gb=8`, `reserved_memory_gb=2`, `max_active_instances=3`, `max_parallel_tasks=1`
+- future 24GB host: increase these knobs (for example `host_memory_gb=24`, `reserved_memory_gb=4`, `max_active_instances=6`, `max_parallel_tasks=2`) without changing instance/task schemas
 
 ### 2. Project-instance
 Persist once per managed repository instance.
@@ -41,7 +58,7 @@ Allowed responsibilities:
 - references to host-global defaults/secrets by name only
 
 Must **not** contain:
-- raw host secrets or host-global concurrency policy
+- raw host secrets or host-global concurrency/resource policy
 - per-task worktree state
 - branch names for active executions
 
@@ -56,7 +73,7 @@ Allowed responsibilities:
 
 Must **not** contain:
 - repo poller settings or repo cursor state
-- host-global runtime configuration
+- host-global runtime/resource configuration
 - raw secrets
 
 ## Encoded Guardrails

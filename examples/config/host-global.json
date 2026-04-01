@@ -17,6 +17,13 @@
     "max_active_instances": 3,
     "max_parallel_tasks": 1
   },
+  "resources": {
+    "host_memory_gb": 8,
+    "reserved_memory_gb": 2,
+    "max_memory_per_instance_gb": 2,
+    "max_memory_per_task_gb": 2,
+    "scale_profile": "conservative-small-host"
+  },
   "secret_refs": {
     "github_token_env": "GITHUB_TOKEN",
     "openai_api_key_env": "OPENAI_API_KEY"
