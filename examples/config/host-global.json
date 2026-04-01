@@ -1,0 +1,28 @@
+{
+  "scope": "host-global",
+  "host_id": "clawhost-dev-01",
+  "paths": {
+    "runtime_root": "/srv/clawhost",
+    "instances_root": "/srv/clawhost/instances",
+    "logs_root": "/var/log/clawhost"
+  },
+  "toolchain": {
+    "node": "24",
+    "python": "3.12",
+    "uv": true,
+    "gh": true,
+    "tmux": true
+  },
+  "concurrency": {
+    "max_active_instances": 3,
+    "max_parallel_tasks": 1
+  },
+  "secret_refs": {
+    "github_token_env": "GITHUB_TOKEN",
+    "openai_api_key_env": "OPENAI_API_KEY"
+  },
+  "logging": {
+    "level": "info",
+    "json": true
+  }
+}
