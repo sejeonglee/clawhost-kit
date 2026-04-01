@@ -15,14 +15,14 @@ SCOPE_RULES = {
         "forbidden": {"repo", "poller", "instance_id", "task_id", "worktree", "execution", "artifacts", "source_ref"},
     },
     "project-instance": {
-        "required": {"instance_id", "repo", "paths", "intake", "poller", "host_defaults_ref", "env"},
-        "allowed": {"scope", "instance_id", "repo", "paths", "intake", "poller", "host_defaults_ref", "env"},
+        "required": {"instance_id", "repo", "paths", "intake", "poller", "host_defaults_ref", "runtime_overrides", "env"},
+        "allowed": {"scope", "instance_id", "created_at", "repo", "paths", "intake", "poller", "host_defaults_ref", "runtime_overrides", "env"},
         "forbidden": {"host_id", "concurrency", "resources", "secret_refs", "task_id", "worktree", "execution", "artifacts", "source_ref"},
     },
     "per-task-ephemeral": {
         "required": {"task_id", "instance_id", "source_ref", "worktree", "execution", "artifacts"},
         "allowed": {"scope", "task_id", "instance_id", "source_ref", "worktree", "execution", "artifacts"},
-        "forbidden": {"host_id", "repo", "poller", "concurrency", "resources", "secret_refs", "logging", "intake", "host_defaults_ref"},
+        "forbidden": {"host_id", "repo", "poller", "concurrency", "resources", "secret_refs", "logging", "intake", "host_defaults_ref", "runtime_overrides"},
     },
 }
 

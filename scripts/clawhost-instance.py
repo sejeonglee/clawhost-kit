@@ -10,8 +10,10 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 DEFAULT_POLL_INTERVAL_SECONDS = 300
-DEFAULT_MAX_PARALLEL_TASKS = 2
+DEFAULT_MAX_PARALLEL_TASKS = 1
 DEFAULT_MAX_ACTIVE_WORKTREES = 2
+DEFAULT_HOST_DEFAULTS_REF = "clawhost-default"
+DEFAULT_BRANCH = "main"
 
 
 def utc_now() -> str:
@@ -54,7 +56,7 @@ def instance_paths(instances_root: Path, name: str) -> dict[str, Path]:
         'config_file': instance_root / 'config' / 'project-instance.json',
         'state_dir': instance_root / 'state',
         'runtime_file': instance_root / 'state' / 'runtime.json',
-        'cursor_file': instance_root / 'state' / 'github-issues-cursor.json',
+        'cursor_file': instance_root / 'state' / 'github-issue-cursor.json',
         'manual_brief_dir': instance_root / 'intake' / 'manual-briefs',
         'manual_brief_archive_dir': instance_root / 'intake' / 'manual-briefs-archive',
         'worktrees_dir': instance_root / 'worktrees',
@@ -69,19 +71,27 @@ def create_instance(args: argparse.Namespace) -> int:
         paths[key].mkdir(parents=True, exist_ok=True)
 
     config = {
-        'instance_name': args.name,
+        'scope': 'project-instance',
+        'instance_id': args.name,
         'created_at': utc_now(),
         'repo': {
             'url': args.repo_url,
+            'default_branch': args.default_branch,
             'github_owner': owner,
             'github_repo': repo,
             'slug': f'{owner}/{repo}',
         },
+        'paths': {
+            'instance_root': str(paths['instance_root']),
+            'state_root': str(paths['state_dir']),
+            'worktrees_root': str(paths['worktrees_dir']),
+            'logs_root': str(paths['logs_dir']),
+        },
         'intake': {
+            'sources': ['github_issue', 'manual_brief'],
             'github_issue_polling': {
                 'enabled': True,
                 'poll_interval_seconds': args.poll_interval_seconds,
-                'cursor_path': str(paths['cursor_file']),
             },
             'manual_brief': {
                 'enabled': True,
@@ -89,14 +99,18 @@ def create_instance(args: argparse.Namespace) -> int:
                 'archive_dir': str(paths['manual_brief_archive_dir']),
             },
         },
-        'runtime_defaults': {
+        'poller': {
+            'provider': 'github_issue',
+            'interval_seconds': args.poll_interval_seconds,
+            'cursor_file': str(paths['cursor_file']),
+        },
+        'host_defaults_ref': args.host_defaults_ref,
+        'runtime_overrides': {
             'max_parallel_tasks': args.max_parallel_tasks,
             'max_active_worktrees': args.max_active_worktrees,
         },
-        'paths': {
-            'instance_root': str(paths['instance_root']),
-            'worktrees_dir': str(paths['worktrees_dir']),
-            'logs_dir': str(paths['logs_dir']),
+        'env': {
+            'workspace_name': args.name,
         },
     }
     json_dump(paths['config_file'], config)
@@ -112,8 +126,10 @@ def create_instance(args: argparse.Namespace) -> int:
     })
 
     print(json.dumps({
-        'instance_name': args.name,
+        'instance_id': args.name,
+        'repo_url': args.repo_url,
         'instance_root': str(paths['instance_root']),
+        'config_path': str(paths['config_file']),
         'repo_slug': f'{owner}/{repo}',
         'status': 'created',
     }))
@@ -128,12 +144,12 @@ def start_instance(args: argparse.Namespace) -> int:
         'started_at': utc_now(),
         'updated_at': utc_now(),
         'repo_slug': config['repo']['slug'],
-        'poll_interval_seconds': config['intake']['github_issue_polling']['poll_interval_seconds'],
-        'max_parallel_tasks': config['runtime_defaults']['max_parallel_tasks'],
-        'max_active_worktrees': config['runtime_defaults']['max_active_worktrees'],
+        'poll_interval_seconds': config['poller']['interval_seconds'],
+        'max_parallel_tasks': config['runtime_overrides']['max_parallel_tasks'],
+        'max_active_worktrees': config['runtime_overrides']['max_active_worktrees'],
         'intake_sources': ['github_issue_polling', 'manual_brief'],
         'manual_brief_dir': config['intake']['manual_brief']['inbox_dir'],
-        'cursor_path': config['intake']['github_issue_polling']['cursor_path'],
+        'cursor_path': config['poller']['cursor_file'],
     }
     json_dump(paths['runtime_file'], runtime)
     if not paths['cursor_file'].exists():
@@ -151,16 +167,16 @@ def status_instance(args: argparse.Namespace) -> int:
     config = json_load(paths['config_file'])
     runtime = json_load(paths['runtime_file'])
     payload = {
-        'instance_name': config['instance_name'],
+        'instance_id': config['instance_id'],
         'status': runtime['status'],
         'repo_slug': config['repo']['slug'],
         'repo_url': config['repo']['url'],
-        'poll_interval_seconds': config['intake']['github_issue_polling']['poll_interval_seconds'],
-        'max_parallel_tasks': config['runtime_defaults']['max_parallel_tasks'],
-        'max_active_worktrees': config['runtime_defaults']['max_active_worktrees'],
+        'poll_interval_seconds': config['poller']['interval_seconds'],
+        'max_parallel_tasks': config['runtime_overrides']['max_parallel_tasks'],
+        'max_active_worktrees': config['runtime_overrides']['max_active_worktrees'],
         'manual_brief_dir': config['intake']['manual_brief']['inbox_dir'],
-        'cursor_path': config['intake']['github_issue_polling']['cursor_path'],
-        'worktrees_dir': config['paths']['worktrees_dir'],
+        'cursor_path': config['poller']['cursor_file'],
+        'worktrees_dir': config['paths']['worktrees_root'],
     }
     print(json.dumps(payload))
     return 0
@@ -174,6 +190,8 @@ def build_parser() -> argparse.ArgumentParser:
     create.add_argument('--instances-root', type=Path, required=True)
     create.add_argument('--name', required=True)
     create.add_argument('--repo-url', required=True)
+    create.add_argument('--default-branch', default=DEFAULT_BRANCH)
+    create.add_argument('--host-defaults-ref', default=DEFAULT_HOST_DEFAULTS_REF)
     create.add_argument('--poll-interval-seconds', type=int, default=DEFAULT_POLL_INTERVAL_SECONDS)
     create.add_argument('--max-parallel-tasks', type=int, default=DEFAULT_MAX_PARALLEL_TASKS)
     create.add_argument('--max-active-worktrees', type=int, default=DEFAULT_MAX_ACTIVE_WORKTREES)

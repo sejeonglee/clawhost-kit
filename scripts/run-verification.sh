@@ -34,11 +34,12 @@ fi
 
 mkdir -p "$ARTIFACTS_DIR"
 
-STEP_LABELS=(unit-tests python-compile bash-syntax docker-harness-dry-run docker-harness-live)
+STEP_LABELS=(unit-tests python-compile bash-syntax generated-artifact-validation docker-harness-dry-run docker-harness-live)
 STEP_COMMANDS=(
   "python3 -m unittest discover -s tests -p 'test_*.py'"
-  "python3 -m py_compile scripts/clawhost-instance.py"
-  "bash -n scripts/bootstrap-host-runtime.sh && bash -n scripts/run-docker-harness.sh && bash -n docker/harness-entrypoint.sh"
+  "python3 -m py_compile scripts/*.py tools/*.py"
+  "bash -n scripts/bootstrap-host-runtime.sh && bash -n scripts/run-docker-harness.sh && bash -n scripts/run-verification.sh && bash -n docker/harness-entrypoint.sh"
+  "python3 scripts/verify-generated-artifacts.py --repo-url $REPO_URL --artifacts-dir $ARTIFACTS_DIR/generated-artifact-validation"
   "scripts/run-docker-harness.sh --dry-run --repo-url $REPO_URL --artifacts-dir $ARTIFACTS_DIR/docker-harness"
   "scripts/run-docker-harness.sh --repo-url $REPO_URL --artifacts-dir $ARTIFACTS_DIR/docker-harness"
 )
@@ -74,8 +75,9 @@ run_and_capture() {
 run_and_capture "unit-tests" "${STEP_COMMANDS[0]}"
 run_and_capture "python-compile" "${STEP_COMMANDS[1]}"
 run_and_capture "bash-syntax" "${STEP_COMMANDS[2]}"
-run_and_capture "docker-harness-dry-run" "${STEP_COMMANDS[3]}"
-run_and_capture "docker-harness-live" "${STEP_COMMANDS[4]}"
+run_and_capture "generated-artifact-validation" "${STEP_COMMANDS[3]}"
+run_and_capture "docker-harness-dry-run" "${STEP_COMMANDS[4]}"
+run_and_capture "docker-harness-live" "${STEP_COMMANDS[5]}"
 
 python3 - <<PY > "$ARTIFACTS_DIR/summary.json"
 import json
@@ -86,6 +88,7 @@ summary = {
     'artifacts_dir': str(artifacts),
     'logs': sorted(p.name for p in artifacts.glob('*.log')),
     'docker_artifacts': sorted(p.name for p in (artifacts / 'docker-harness').glob('*')),
+    'generated_artifacts': sorted(p.name for p in (artifacts / 'generated-artifact-validation').glob('*')),
 }
 print(json.dumps(summary))
 PY

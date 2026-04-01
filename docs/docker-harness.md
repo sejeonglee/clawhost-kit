@@ -18,3 +18,15 @@ scripts/run-docker-harness.sh \
 
 Add `--dry-run` to preview the `docker build` / `docker run` commands without executing Docker.
 Artifacts are written to the host-mounted artifacts directory as JSON/log files.
+
+
+## Additional generated-artifact checks
+
+The harness now exports and validates:
+
+- `generated-project-instance.json`
+- `generated-task-ephemeral.json`
+- `generated-config-validation.log`
+- `generated-runtime-validation.log`
+
+This ensures the generated instance artifacts match the same canonical schema expected by the examples and validators.

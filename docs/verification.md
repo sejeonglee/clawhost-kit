@@ -11,8 +11,9 @@ scripts/run-verification.sh \
 It performs:
 
 - Python test discovery over `tests/test_*.py`
-- Python compile check for the instance lifecycle CLI
-- Bash syntax checks for the bootstrap and Docker harness scripts
+- Python compile checks for all scripts/tools
+- Bash syntax checks for the bootstrap, verification, and Docker harness scripts
+- Generated-artifact validation by creating a real project-instance config and validating it against `tools/config_boundary.py` and `tools/runtime_isolation.py`
 - Docker harness dry-run
 - Live Docker harness execution with the repo URL injected at runtime
 

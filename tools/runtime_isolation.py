@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -31,6 +32,35 @@ def _assert_under(path: Path, root: Path, label: str) -> None:
 def _validate_positive_int(value: Any, label: str) -> None:
     if not isinstance(value, int) or value < 1:
         raise IsolationError(f"{label} must be a positive integer")
+
+
+def build_task_fixture(project: dict[str, Any], task_id: str = "sandbox-smoke") -> dict[str, Any]:
+    instance_id = project["instance_id"]
+    worktrees_root = _as_path(project["paths"]["worktrees_root"])
+    state_root = _as_path(project["paths"]["state_root"])
+    return {
+        "scope": "per-task-ephemeral",
+        "task_id": task_id,
+        "instance_id": instance_id,
+        "source_ref": {
+            "kind": "github_issue",
+            "id": task_id,
+        },
+        "worktree": {
+            "path": str(worktrees_root / task_id),
+            "branch": f"autonomous/{task_id}",
+        },
+        "execution": {
+            "status": "queued",
+            "attempt": 1,
+            "started_at": None,
+            "finished_at": None,
+        },
+        "artifacts": {
+            "log_file": str(state_root / "tasks" / task_id / "run.log"),
+            "result_file": str(state_root / "tasks" / task_id / "result.json"),
+        },
+    }
 
 
 def validate_runtime_isolation(host: dict[str, Any], project: dict[str, Any], task: dict[str, Any]) -> None:
@@ -74,10 +104,18 @@ def validate_runtime_isolation(host: dict[str, Any], project: dict[str, Any], ta
     state_root = _as_path(project["paths"]["state_root"])
     worktrees_root = _as_path(project["paths"]["worktrees_root"])
     cursor_file = _as_path(project["poller"]["cursor_file"])
+    runtime_overrides = project["runtime_overrides"]
 
     _assert_under(state_root, instance_root, "project state_root")
     _assert_under(worktrees_root, instance_root, "project worktrees_root")
     _assert_under(cursor_file, state_root, "project poller.cursor_file")
+
+    _validate_positive_int(runtime_overrides.get("max_parallel_tasks"), "project runtime_overrides.max_parallel_tasks")
+    _validate_positive_int(runtime_overrides.get("max_active_worktrees"), "project runtime_overrides.max_active_worktrees")
+    if runtime_overrides["max_parallel_tasks"] > concurrency["max_parallel_tasks"]:
+        raise IsolationError("project runtime_overrides.max_parallel_tasks must be <= host concurrency.max_parallel_tasks")
+    if runtime_overrides["max_active_worktrees"] > concurrency["max_active_instances"]:
+        raise IsolationError("project runtime_overrides.max_active_worktrees must be <= host concurrency.max_active_instances")
 
     if task["instance_id"] != project["instance_id"]:
         raise IsolationError(

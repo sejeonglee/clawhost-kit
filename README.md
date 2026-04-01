@@ -65,6 +65,7 @@ Use `scripts/clawhost-instance.py` to:
 Use:
 - `tools/config_boundary.py`
 - `tools/runtime_isolation.py`
+- `scripts/verify-generated-artifacts.py`
 
 to validate the separation between:
 - **host-global** config
@@ -395,6 +396,8 @@ Important properties:
 - artifacts are written back to the host via a mounted artifacts directory
 
 Expected Docker harness outputs include:
+- generated project-instance and task-ephemeral artifacts
+- validator logs proving generated artifacts match the canonical schema
 - `bootstrap-plan.json`
 - `bootstrap-install.log`
 - `instance-create.json`
@@ -422,7 +425,9 @@ This runs:
 2. Python compile checks
 3. Bash syntax checks
 4. Docker harness dry-run
-5. Docker harness live execution
+4. Generated project-instance artifact validation
+5. Docker harness dry-run
+6. Docker harness live execution
 
 Expected top-level artifact:
 - `.artifacts/verification/summary.json`

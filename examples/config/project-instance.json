@@ -8,7 +8,8 @@
   "paths": {
     "instance_root": "/srv/clawhost/instances/llm-report-module",
     "state_root": "/srv/clawhost/instances/llm-report-module/state",
-    "worktrees_root": "/srv/clawhost/instances/llm-report-module/worktrees"
+    "worktrees_root": "/srv/clawhost/instances/llm-report-module/worktrees",
+    "logs_root": "/srv/clawhost/instances/llm-report-module/logs"
   },
   "intake": {
     "sources": [
@@ -22,6 +23,10 @@
     "cursor_file": "/srv/clawhost/instances/llm-report-module/state/github-issue-cursor.json"
   },
   "host_defaults_ref": "clawhost-dev-01",
+  "runtime_overrides": {
+    "max_parallel_tasks": 1,
+    "max_active_worktrees": 2
+  },
   "env": {
     "workspace_name": "llm-report-module"
   }

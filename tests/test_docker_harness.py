@@ -42,6 +42,13 @@ class DockerHarnessTests(unittest.TestCase):
         self.assertNotIn("llm-report-module", dockerfile)
         self.assertIn("COPY . /workspace", dockerfile)
 
+    def test_harness_entrypoint_validates_generated_config(self):
+        entrypoint = (REPO_ROOT / "docker" / "harness-entrypoint.sh").read_text()
+        self.assertIn("generated-project-instance.json", entrypoint)
+        self.assertIn("generated-task-ephemeral.json", entrypoint)
+        self.assertIn("tools/config_boundary.py", entrypoint)
+        self.assertIn("tools/runtime_isolation.py", entrypoint)
+
 
 if __name__ == "__main__":
     unittest.main()

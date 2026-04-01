@@ -32,6 +32,7 @@ class VerificationScriptTests(unittest.TestCase):
             self.assertEqual(payload["repo_url"], "https://github.com/sejeonglee/llm-report-module")
             labels = [step["label"] for step in payload["steps"]]
             self.assertEqual(labels[:3], ["unit-tests", "python-compile", "bash-syntax"])
+            self.assertIn("generated-artifact-validation", labels)
             self.assertIn("docker-harness-dry-run", labels)
             self.assertIn("docker-harness-live", labels)
             self.assertEqual(payload["artifacts_dir"], tmpdir)

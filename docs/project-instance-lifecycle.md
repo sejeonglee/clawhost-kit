@@ -16,13 +16,43 @@ python3 scripts/clawhost-instance.py status --instances-root /srv/clawhost/insta
 
 ## What `create` materializes
 
-- `config/project-instance.json` with the runtime repo URL and derived GitHub owner/repo slug
-- GitHub Issue polling intake config with a per-instance cursor path
+- `config/project-instance.json` matching the canonical `project-instance` schema
+- GitHub Issue polling intake config with a per-instance cursor file
 - Manual Brief intake inbox/archive directories
-- Conservative but configurable runtime defaults for parallel tasks and active worktrees
+- Conservative but configurable instance-local runtime overrides for parallel tasks and active worktrees
+
+## Canonical generated schema
+
+`create` emits a `project-instance` document with these top-level keys:
+
+- `scope`
+- `instance_id`
+- `repo`
+- `paths`
+- `intake`
+- `poller`
+- `host_defaults_ref`
+- `runtime_overrides`
+- `env`
 
 ## What `start` does
 
 - Marks the instance as `running` in `state/runtime.json`
 - Ensures GitHub issue cursor state exists
 - Exposes the active intake targets and worktree paths for downstream harness/poller work
+
+## Verification expectations
+
+Generated instance artifacts should validate with:
+
+```bash
+python3 tools/config_boundary.py \
+  examples/config/host-global.json \
+  /path/to/generated/project-instance.json \
+  /path/to/generated/task-ephemeral.json
+
+python3 tools/runtime_isolation.py \
+  examples/config/host-global.json \
+  /path/to/generated/project-instance.json \
+  /path/to/generated/task-ephemeral.json
+```
