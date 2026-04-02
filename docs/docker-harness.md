@@ -19,6 +19,8 @@ scripts/run-docker-harness.sh \
 Add `--dry-run` to preview the `docker build` / `docker run` commands without executing Docker.
 Artifacts are written to the host-mounted artifacts directory as JSON/log files.
 
+The dry-run JSON now also includes `repo_url_injection`, which explicitly records that the target repo URL is forwarded only at `docker run` time through the `REPO_URL` environment variable.
+
 
 ## Additional generated-artifact checks
 
