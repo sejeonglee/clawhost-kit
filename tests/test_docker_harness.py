@@ -51,6 +51,8 @@ class DockerHarnessTests(unittest.TestCase):
         entrypoint = (REPO_ROOT / "docker" / "harness-entrypoint.sh").read_text()
         self.assertIn("generated-project-instance.json", entrypoint)
         self.assertIn("generated-task-ephemeral.json", entrypoint)
+        self.assertIn("bootstrap-install.json", entrypoint)
+        self.assertIn("instance-describe.json", entrypoint)
         self.assertIn("tools/config_boundary.py", entrypoint)
         self.assertIn("tools/runtime_isolation.py", entrypoint)
 
