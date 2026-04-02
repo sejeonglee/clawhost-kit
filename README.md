@@ -217,6 +217,12 @@ The script will:
 - execute `OPENCLAW_INSTALL_CMD` / `CLAWTEAM_INSTALL_CMD` if you provided them
 - warn for tools that still need manual installation
 
+Optional Linux/systemd starting point:
+- `examples/services/systemd/clawhost-instance.env.example`
+- `examples/services/systemd/clawhost-instance-bootstrap@.service`
+
+These assets do **not** create a full poller/gateway daemon stack; they give you a concrete host-local wrapper for bootstrap + instance create/start so you do not have to invent the first service wiring from scratch.
+
 ---
 
 # Project instance setup
@@ -526,3 +532,4 @@ If you want the shortest clarification on what the repo does vs. what you still 
 - `docs/runtime-isolation.md`
 - `docs/docker-harness.md`
 - `docs/verification.md`
+- `examples/services/systemd/`

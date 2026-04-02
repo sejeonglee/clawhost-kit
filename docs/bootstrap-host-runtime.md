@@ -118,6 +118,13 @@ scripts/bootstrap-host-runtime.sh check --json
 
 If this still reports non-`present` tools, finish the remaining manual steps before moving on to instance creation.
 
+If you want a Linux/systemd starting point for the next step, use:
+
+- `examples/services/systemd/clawhost-instance.env.example`
+- `examples/services/systemd/clawhost-instance-bootstrap@.service`
+
+These assets intentionally cover only bootstrap + instance create/start. They do not define a full polling daemon or gateway topology for you.
+
 ## Usage
 
 ```bash
