@@ -19,6 +19,22 @@
 scripts/bootstrap-host-runtime.sh plan --json
 scripts/bootstrap-host-runtime.sh check --json
 scripts/bootstrap-host-runtime.sh install --dry-run --runtime-root /tmp/clawhost
+scripts/bootstrap-host-runtime.sh install --dry-run --json --runtime-root /tmp/clawhost
 ```
 
 The script auto-detects `brew` or `apt-get`. For `gh`, `openclaw`, and `clawteam`, it emits install hints when no safe built-in installer is available.
+
+`install --dry-run --json` is the most complete operator-facing report. It includes:
+
+- `runtime_root`
+- `created_directories`
+- `tool_actions` with package-manager installs or manual-install hints
+
+The install layout now reserves shared host directories for:
+
+- `bin`
+- `instances`
+- `logs`
+- `cache`
+- `env`
+- `services`

@@ -8,7 +8,7 @@ RUNTIME_ROOT="${CLAWHOST_RUNTIME_ROOT:-/opt/clawhost}"
 PACKAGE_MANAGER="${CLAWHOST_PACKAGE_MANAGER:-}"
 
 TOOLS=(git tmux node python3 uv gh openclaw clawteam)
-RUNTIME_DIRS=(bin instances logs cache)
+RUNTIME_DIRS=(bin instances logs cache env services)
 
 usage() {
   cat <<'EOF'
@@ -241,20 +241,94 @@ emit_json_report() {
   printf ']}}\n'
 }
 
+emit_install_json_report() {
+  local pm=$1
+  local step_payloads=()
+  local tool status install_json hint command_json step_json
+  local created_dirs=()
+  local dir_name idx
+
+  for dir_name in "${RUNTIME_DIRS[@]}"; do
+    created_dirs+=("$RUNTIME_ROOT/$dir_name")
+  done
+
+  for tool in "${TOOLS[@]}"; do
+    status=$(step_status "$tool")
+    install_json=$(step_install_json "$tool" "$pm")
+    hint=$(step_install_hint "$tool" "$pm")
+    command_json=
+
+    case "$tool" in
+      openclaw)
+        if [[ -n "${OPENCLAW_INSTALL_CMD:-}" ]]; then
+          command_json="\"command\":\"$(json_escape "$OPENCLAW_INSTALL_CMD")\""
+        fi
+        ;;
+      clawteam)
+        if [[ -n "${CLAWTEAM_INSTALL_CMD:-}" ]]; then
+          command_json="\"command\":\"$(json_escape "$CLAWTEAM_INSTALL_CMD")\""
+        fi
+        ;;
+    esac
+
+    step_json="{\"id\":\"$(json_escape "$tool")\",\"status\":\"$(json_escape "$status")\""
+    if [[ "$install_json" != '[]' ]]; then
+      step_json+=",\"install\":${install_json}"
+    fi
+    if [[ -n "$hint" ]]; then
+      step_json+=",\"install_hint\":\"$(json_escape "$hint")\""
+    fi
+    if [[ -n "$command_json" ]]; then
+      step_json+=",$command_json"
+    fi
+    step_json+="}"
+    step_payloads+=("$step_json")
+  done
+
+  printf '{"runtime_root":"%s","package_manager":"%s","dry_run":%s,"created_directories":[' \
+    "$(json_escape "$RUNTIME_ROOT")" "$(json_escape "$pm")" "$([[ "$DRY_RUN" -eq 1 ]] && printf true || printf false)"
+  for idx in "${!created_dirs[@]}"; do
+    if (( idx > 0 )); then
+      printf ','
+    fi
+    printf '"%s"' "$(json_escape "${created_dirs[$idx]}")"
+  done
+  printf '],"tool_actions":['
+  for idx in "${!step_payloads[@]}"; do
+    if (( idx > 0 )); then
+      printf ','
+    fi
+    printf '%s' "${step_payloads[$idx]}"
+  done
+  printf ']}\n'
+}
+
 run_command() {
   if (( DRY_RUN )); then
-    printf 'DRY RUN %s\n' "$*"
+    if (( ! OUTPUT_JSON )); then
+      printf 'DRY RUN %s\n' "$*"
+    fi
   else
-    "$@"
+    if (( OUTPUT_JSON )); then
+      "$@" >/dev/null
+    else
+      "$@"
+    fi
   fi
 }
 
 run_shell_command() {
   local command=$1
   if (( DRY_RUN )); then
-    printf 'DRY RUN %s\n' "$command"
+    if (( ! OUTPUT_JSON )); then
+      printf 'DRY RUN %s\n' "$command"
+    fi
   else
-    bash -lc "$command"
+    if (( OUTPUT_JSON )); then
+      bash -lc "$command" >/dev/null
+    else
+      bash -lc "$command"
+    fi
   fi
 }
 
@@ -370,6 +444,9 @@ case "$ACTION" in
     for tool in "${TOOLS[@]}"; do
       install_tool "$tool" "$PM"
     done
+    if (( OUTPUT_JSON )); then
+      emit_install_json_report "$PM"
+    fi
     ;;
   *)
     usage >&2

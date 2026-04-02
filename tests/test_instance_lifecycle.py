@@ -132,6 +132,48 @@ class InstanceLifecycleTests(unittest.TestCase):
             task = build_task_fixture(config, task_id="issue-42")
             validate_runtime_isolation(host, config, task)
 
+    def test_describe_reports_full_instance_surface_for_real_setup(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir) / "instances"
+            self.run_script(
+                "create",
+                "--instances-root",
+                str(root),
+                "--name",
+                "reporting",
+                "--repo-url",
+                "https://github.com/sejeonglee/llm-report-module",
+                "--host-defaults-ref",
+                "clawhost-dev-01",
+            )
+            self.run_script(
+                "start",
+                "--instances-root",
+                str(root),
+                "--name",
+                "reporting",
+            )
+
+            describe = self.run_script(
+                "describe",
+                "--instances-root",
+                str(root),
+                "--name",
+                "reporting",
+            )
+
+            self.assertEqual(describe.returncode, 0, describe.stderr)
+            payload = json.loads(describe.stdout)
+            self.assertEqual(payload["instance_id"], "reporting")
+            self.assertEqual(payload["status"], "running")
+            self.assertEqual(payload["repo"]["slug"], "sejeonglee/llm-report-module")
+            self.assertEqual(payload["paths"]["config_file"], str(root / "reporting" / "config" / "project-instance.json"))
+            self.assertEqual(payload["paths"]["runtime_file"], str(root / "reporting" / "state" / "runtime.json"))
+            self.assertEqual(payload["paths"]["worktrees_root"], str(root / "reporting" / "worktrees"))
+            self.assertEqual(payload["intake"]["manual_brief"]["archive_dir"], str(root / "reporting" / "intake" / "manual-briefs-archive"))
+            self.assertEqual(payload["runtime"]["max_active_worktrees"], 2)
+            self.assertEqual(payload["host_defaults_ref"], "clawhost-dev-01")
+
 
 if __name__ == "__main__":
     unittest.main()

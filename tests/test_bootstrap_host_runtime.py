@@ -94,6 +94,40 @@ class BootstrapHostRuntimeTests(unittest.TestCase):
             self.assertIn("DRY RUN echo install-openclaw", result.stdout)
             self.assertIn("DRY RUN echo install-clawteam", result.stdout)
 
+    def test_install_json_reports_created_layout_and_tool_actions(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            runtime_root = Path(tmpdir) / "runtime"
+            result = self.run_script(
+                "install",
+                "--json",
+                "--dry-run",
+                "--runtime-root",
+                str(runtime_root),
+                "--package-manager",
+                "apt-get",
+                env={
+                    "CLAWHOST_PRESENT_TOOLS": "git,tmux,node,python3",
+                    "CLAWHOST_MISSING_TOOLS": "uv,gh,openclaw,clawteam",
+                    "OPENCLAW_INSTALL_CMD": "echo install-openclaw",
+                    "CLAWTEAM_INSTALL_CMD": "echo install-clawteam",
+                },
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["runtime_root"], str(runtime_root))
+            self.assertEqual(payload["package_manager"], "apt-get")
+            self.assertEqual(payload["dry_run"], True)
+            self.assertIn(str(runtime_root / "instances"), payload["created_directories"])
+            self.assertIn(str(runtime_root / "services"), payload["created_directories"])
+
+            actions = {step["id"]: step for step in payload["tool_actions"]}
+            self.assertEqual(actions["git"]["status"], "present")
+            self.assertEqual(actions["uv"]["status"], "missing")
+            self.assertIn("astral.sh/uv/install.sh", actions["uv"]["install_hint"])
+            self.assertEqual(actions["openclaw"]["command"], "echo install-openclaw")
+            self.assertEqual(actions["clawteam"]["command"], "echo install-clawteam")
+
 
 if __name__ == "__main__":
     unittest.main()
