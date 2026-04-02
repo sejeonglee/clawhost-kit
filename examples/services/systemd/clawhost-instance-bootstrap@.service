@@ -1,0 +1,31 @@
+[Unit]
+Description=Bootstrap and start Clawhost instance %i
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/clawhost/%i.env
+ExecStart=/usr/bin/env bash -lc '\
+  set -euo pipefail; \
+  cd "$CLAWHOST_REPO_ROOT"; \
+  scripts/bootstrap-host-runtime.sh install --runtime-root "$CLAWHOST_RUNTIME_ROOT"; \
+  config_path="$CLAWHOST_INSTANCES_ROOT/$CLAWHOST_INSTANCE_NAME/config/project-instance.json"; \
+  if [[ ! -f "$config_path" ]]; then \
+    python3 scripts/clawhost-instance.py create \
+      --instances-root "$CLAWHOST_INSTANCES_ROOT" \
+      --name "$CLAWHOST_INSTANCE_NAME" \
+      --repo-url "$CLAWHOST_REPO_URL" \
+      --default-branch "${CLAWHOST_DEFAULT_BRANCH:-main}" \
+      --host-defaults-ref "${CLAWHOST_HOST_DEFAULTS_REF:-clawhost-default}" \
+      --poll-interval-seconds "${CLAWHOST_POLL_INTERVAL_SECONDS:-300}" \
+      --max-parallel-tasks "${CLAWHOST_MAX_PARALLEL_TASKS:-1}" \
+      --max-active-worktrees "${CLAWHOST_MAX_ACTIVE_WORKTREES:-2}"; \
+  fi; \
+  python3 scripts/clawhost-instance.py start \
+    --instances-root "$CLAWHOST_INSTANCES_ROOT" \
+    --name "$CLAWHOST_INSTANCE_NAME"'
+
+[Install]
+WantedBy=multi-user.target

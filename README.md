@@ -146,6 +146,8 @@ scripts/bootstrap-host-runtime.sh check --json
 Notes:
 - `plan` always reports.
 - `check` exits non-zero if required tools are missing.
+- `check` is a readiness gate: it only passes when every tool reports `present`, including `openclaw` and `clawteam`.
+- `docs/bootstrap-host-runtime.md` explains the `present` / `missing` / `manual` states and the operator decisions to make before install.
 
 ---
 
@@ -185,6 +187,7 @@ This is the safest first execution because it:
 - shows what would happen
 - creates no destructive side effects
 - confirms your chosen runtime root
+- shows the exact install commands or hints the bootstrap will use for each missing tool
 
 Recommended runtime root:
 
@@ -213,6 +216,12 @@ The script will:
 - install tools it knows how to install safely
 - execute `OPENCLAW_INSTALL_CMD` / `CLAWTEAM_INSTALL_CMD` if you provided them
 - warn for tools that still need manual installation
+
+Optional Linux/systemd starting point:
+- `examples/services/systemd/clawhost-instance.env.example`
+- `examples/services/systemd/clawhost-instance-bootstrap@.service`
+
+These assets do **not** create a full poller/gateway daemon stack; they give you a concrete host-local wrapper for bootstrap + instance create/start so you do not have to invent the first service wiring from scratch.
 
 ---
 
@@ -510,6 +519,9 @@ This repo gives you:
 
 So yes — **you can start setting this up right now on the current host** — but for a real production-like install you still need to choose the exact OpenClaw/ClawTeam installation commands for your OS and environment.
 
+If you want the shortest clarification on what the repo does vs. what you still need to decide, read:
+- `docs/bootstrap-host-runtime.md`
+
 ---
 
 # Supporting docs
@@ -520,3 +532,4 @@ So yes — **you can start setting this up right now on the current host** — b
 - `docs/runtime-isolation.md`
 - `docs/docker-harness.md`
 - `docs/verification.md`
+- `examples/services/systemd/`
