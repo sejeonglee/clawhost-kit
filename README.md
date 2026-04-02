@@ -146,6 +146,8 @@ scripts/bootstrap-host-runtime.sh check --json
 Notes:
 - `plan` always reports.
 - `check` exits non-zero if required tools are missing.
+- `check` is a readiness gate: it only passes when every tool reports `present`, including `openclaw` and `clawteam`.
+- `docs/bootstrap-host-runtime.md` explains the `present` / `missing` / `manual` states and the operator decisions to make before install.
 
 ---
 
@@ -185,6 +187,7 @@ This is the safest first execution because it:
 - shows what would happen
 - creates no destructive side effects
 - confirms your chosen runtime root
+- shows the exact install commands or hints the bootstrap will use for each missing tool
 
 Recommended runtime root:
 
@@ -509,6 +512,9 @@ This repo gives you:
 - the verification path
 
 So yes — **you can start setting this up right now on the current host** — but for a real production-like install you still need to choose the exact OpenClaw/ClawTeam installation commands for your OS and environment.
+
+If you want the shortest clarification on what the repo does vs. what you still need to decide, read:
+- `docs/bootstrap-host-runtime.md`
 
 ---
 
