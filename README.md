@@ -189,6 +189,20 @@ This is the safest first execution because it:
 - confirms your chosen runtime root
 - shows the exact install commands or hints the bootstrap will use for each missing tool
 
+If you want a machine-readable bootstrap artifact for automation/runbooks:
+
+```bash
+scripts/bootstrap-host-runtime.sh install \
+  --dry-run \
+  --json \
+  --runtime-root /srv/clawhost
+```
+
+That JSON reports:
+- the chosen runtime root
+- the directories that will be created
+- per-tool install actions and manual-install hints
+
 Recommended runtime root:
 
 ```text
@@ -211,6 +225,8 @@ This creates the base host layout:
 - instances/
 - logs/
 - cache/
+- env/
+- services/
 
 The script will:
 - install tools it knows how to install safely
@@ -288,6 +304,24 @@ This shows:
 - cursor path
 - runtime task/worktree caps
 - manual brief inbox path
+
+---
+
+## Step 8. Describe the full instance surface
+
+```bash
+python3 scripts/clawhost-instance.py describe \
+  --instances-root /srv/clawhost/instances \
+  --name llm-report-module
+```
+
+This emits a fuller JSON payload for operators/automation, including:
+- repo metadata and default branch
+- config/runtime/cursor file paths
+- instance roots for state, worktrees, and logs
+- intake configuration including manual-brief inbox/archive directories
+- runtime caps and poll interval
+- host-defaults reference
 
 ---
 
@@ -487,6 +521,11 @@ python3 scripts/clawhost-instance.py start \
 
 # 8. inspect instance
 python3 scripts/clawhost-instance.py status \
+  --instances-root /srv/clawhost/instances \
+  --name llm-report-module
+
+# 9. capture the full instance surface for automation/runbooks
+python3 scripts/clawhost-instance.py describe \
   --instances-root /srv/clawhost/instances \
   --name llm-report-module
 ```

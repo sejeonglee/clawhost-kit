@@ -54,6 +54,14 @@ labels = sys.argv[3:sep]
 commands = sys.argv[sep + 1:]
 print(json.dumps({
     'repo_url': repo_url,
+    'repo_url_injection': {
+        'source': '--repo-url',
+        'forwarded_to': [
+            'generated-artifact-validation',
+            'docker-harness-dry-run',
+            'docker-harness-live',
+        ],
+    },
     'artifacts_dir': artifacts_dir,
     'steps': [
         {'label': label, 'command': command}

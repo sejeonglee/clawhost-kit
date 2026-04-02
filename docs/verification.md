@@ -18,3 +18,5 @@ It performs:
 - Live Docker harness execution with the repo URL injected at runtime
 
 Use `--dry-run` to preview the verification plan without executing commands.
+
+The dry-run JSON includes `repo_url_injection.forwarded_to` so automation can confirm the supplied repo URL is forwarded only through the generated-artifact validation and Docker harness steps at runtime.

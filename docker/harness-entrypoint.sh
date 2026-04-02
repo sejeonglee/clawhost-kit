@@ -22,6 +22,13 @@ CLAWHOST_PRESENT_TOOLS="git,tmux,python3" \
 CLAWHOST_MISSING_TOOLS="node,uv,gh,openclaw,clawteam" \
 OPENCLAW_INSTALL_CMD="$OPENCLAW_INSTALL_CMD" \
 CLAWTEAM_INSTALL_CMD="$CLAWTEAM_INSTALL_CMD" \
+/workspace/scripts/bootstrap-host-runtime.sh install --dry-run --json --runtime-root "$RUNTIME_ROOT" \
+  > "$ARTIFACTS_DIR/bootstrap-install.json"
+
+CLAWHOST_PRESENT_TOOLS="git,tmux,python3" \
+CLAWHOST_MISSING_TOOLS="node,uv,gh,openclaw,clawteam" \
+OPENCLAW_INSTALL_CMD="$OPENCLAW_INSTALL_CMD" \
+CLAWTEAM_INSTALL_CMD="$CLAWTEAM_INSTALL_CMD" \
 /workspace/scripts/bootstrap-host-runtime.sh install --dry-run --runtime-root "$RUNTIME_ROOT" \
   > "$ARTIFACTS_DIR/bootstrap-install.log"
 
@@ -40,6 +47,11 @@ python3 /workspace/scripts/clawhost-instance.py status \
   --instances-root "$INSTANCES_ROOT" \
   --name "$INSTANCE_NAME" \
   > "$ARTIFACTS_DIR/instance-status.json"
+
+python3 /workspace/scripts/clawhost-instance.py describe \
+  --instances-root "$INSTANCES_ROOT" \
+  --name "$INSTANCE_NAME" \
+  > "$ARTIFACTS_DIR/instance-describe.json"
 
 cp "$INSTANCES_ROOT/$INSTANCE_NAME/config/project-instance.json" \
   "$ARTIFACTS_DIR/generated-project-instance.json"
@@ -78,10 +90,12 @@ summary = {
     "repo_url": instance_create["repo_url"],
     "repo_slug": instance_create["repo_slug"],
     "bootstrap_plan_path": str(artifacts / "bootstrap-plan.json"),
+    "bootstrap_install_json_path": str(artifacts / "bootstrap-install.json"),
     "bootstrap_install_log_path": str(artifacts / "bootstrap-install.log"),
     "instance_create_path": str(artifacts / "instance-create.json"),
     "instance_start_path": str(artifacts / "instance-start.json"),
     "instance_status_path": str(artifacts / "instance-status.json"),
+    "instance_describe_path": str(artifacts / "instance-describe.json"),
     "generated_project_instance_path": str(artifacts / "generated-project-instance.json"),
     "generated_task_ephemeral_path": str(artifacts / "generated-task-ephemeral.json"),
     "generated_config_validation_path": str(artifacts / "generated-config-validation.log"),

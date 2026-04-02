@@ -63,6 +63,11 @@ if (( DRY_RUN )); then
 import json, sys
 print(json.dumps({
   "repo_url": sys.argv[1],
+  "repo_url_injection": {
+    "phase": "runtime",
+    "mechanism": "docker-run-env",
+    "env_var": "REPO_URL",
+  },
   "dockerfile": sys.argv[2],
   "artifacts_dir": sys.argv[3],
   "image_tag": sys.argv[4],

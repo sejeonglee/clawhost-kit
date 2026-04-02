@@ -12,6 +12,7 @@ python3 scripts/clawhost-instance.py create \
 
 python3 scripts/clawhost-instance.py start --instances-root /srv/clawhost/instances --name report-module
 python3 scripts/clawhost-instance.py status --instances-root /srv/clawhost/instances --name report-module
+python3 scripts/clawhost-instance.py describe --instances-root /srv/clawhost/instances --name report-module
 ```
 
 ## What `create` materializes
@@ -41,6 +42,16 @@ python3 scripts/clawhost-instance.py status --instances-root /srv/clawhost/insta
 - Marks the instance as `running` in `state/runtime.json`
 - Ensures GitHub issue cursor state exists
 - Exposes the active intake targets and worktree paths for downstream harness/poller work
+
+## What `describe` adds
+
+`describe` is the most complete lifecycle readout. It returns machine-readable JSON for:
+
+- repo URL, slug, owner, repo, and default branch
+- config/runtime/cursor file paths
+- instance roots for state, worktrees, and logs
+- intake sources plus manual-brief inbox/archive directories
+- runtime caps, poll interval, and host-defaults reference
 
 ## Verification expectations
 
